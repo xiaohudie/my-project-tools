@@ -93,6 +93,8 @@ npx ai-cr || exit 1
 | strictness     | 审查严格程度（high/medium/low）    | 'medium'    |
 | ignore         | 忽略文件/目录/通配符数组           | ['node_modules', '*.md'] |
 | promptTemplate | 自定义 AI 审查提示词模板           | ''          |
+| dryRun         | dry-run 测试模式（不调用 AI）      | false       |
+| tokenLimit     | 单次审查最大 token 数（防止爆量）  | 50000       |
 
 ---
 
@@ -123,13 +125,22 @@ npx ai-cr || exit 1
 - **隐私说明**：代码 diff 会发送到第三方 AI 服务，敏感项目请谨慎使用。
 - **自定义 prompt**：如需特殊审查风格，直接在 promptTemplate 填写，`${diff}` 自动替换。
 - **跳过审查**：可用 `AI_CR_SKIP=1 npx ai-cr` 或 `npx ai-cr --no-verify` 跳过。
+- **dry-run 测试模式**：
+    - 配置 `dryRun: true`，或命令行加 `--dry-run`，或环境变量 `AI_CR_DRY_RUN=1`，可只输出 diff hash，不调用 AI、不消耗 token，适合开发/CI 测试。
+- **tokenLimit 限制**：
+    - 配置 `tokenLimit` 可自定义单次最大 token 数，超限自动终止，避免意外爆量消耗。
+- **diff 缓存机制**：
+    - 工具会自动缓存每个 diff prompt 的 AI 结果（基于 hash），同样内容不会重复请求，显著节省 token。
 
 ---
 
 ## 📦 进阶用法
 
 - 支持多 provider 扩展（如需接入更多 AI，可自定义 provider 字段）。
-- 支持 dry-run、输出到文件、CI 集成等高级用法（可二次开发）。
+- 支持 dry-run、输出到文件、CI 集成等高级用法：
+    - dry-run：`npx ai-cr --dry-run` 或 `AI_CR_DRY_RUN=1 npx ai-cr`
+    - token 限制：`tokenLimit: 20000`（在 config 配置）
+    - 缓存：同一 diff（内容 hash 相同）只会请求一次，反复运行不再消耗 token
 - 可通过 `files` 字段限制 npm 包发布内容，保护隐私。
 
 ---

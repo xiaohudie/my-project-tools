@@ -6,8 +6,17 @@ const git = simpleGit();
 
 // 判断文件是否被 ignore
 function isIgnored(file) {
-  if (!config.ignore) return false;
-  return config.ignore.some(pattern => {
+  // 默认增强 ignore 规则（无论用户配置）
+  const defaultIgnore = [
+    'node_modules', 'dist', 'build', 'coverage', 'out',
+    '*.md', '*.lock', '*.log', '*.test.*', '*.spec.*', '*.snap',
+    '*.png', '*.jpg', '*.jpeg', '*.gif', '*.svg', '*.ico',
+    '*.mp4', '*.mp3', '*.zip', '*.tar', '*.gz', '*.7z',
+    '*.exe', '*.dll', '*.so', '*.bin', '*.pdf', '*.docx', '*.xlsx',
+    '.git', '.DS_Store', '.env', 'ai-cr.config.js',
+  ];
+  const allIgnore = (config.ignore || []).concat(defaultIgnore);
+  return allIgnore.some(pattern => {
     if (pattern.endsWith('/')) {
       // 忽略目录
       return file.startsWith(pattern.replace(/\/$/, ''));
